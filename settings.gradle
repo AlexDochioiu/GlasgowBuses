@@ -1,1 +1,1 @@
-include ':app', ':busseslogic'
+include ':app', ':buseslogic', ':networking'

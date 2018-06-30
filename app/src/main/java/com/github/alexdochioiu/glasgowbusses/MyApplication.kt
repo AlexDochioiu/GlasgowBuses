@@ -2,6 +2,10 @@ package com.github.alexdochioiu.glasgowbusses
 
 import android.app.Application
 import android.content.Context
+import com.github.alexdochioiu.buseslogic.networking.BusesNetworkComponent
+import com.github.alexdochioiu.buseslogic.networking.DaggerBusesNetworkComponent
+import com.github.alexdochioiu.networking.DaggerMainNetworkComponent
+import com.github.alexdochioiu.networking.MainNetworkModule
 import com.jeefo.android.jeefologger.JeefoLogger
 import com.jeefo.android.jeefologger.LazyLogger
 import dagger.Component
@@ -24,8 +28,17 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        val mainNetworkComponent = DaggerMainNetworkComponent.builder()
+                .mainNetworkModule(MainNetworkModule())
+                .build()
+
+        val busesComponent = DaggerBusesNetworkComponent.builder()
+                .mainNetworkComponent(mainNetworkComponent)
+                .build()
+
         daggerComponent = DaggerMyApplication_MyApplicationComponent.builder()
                 .myApplicationModule(MyApplicationModule(applicationContext))
+                .busesNetworkComponent(busesComponent)
                 .build();
 
         daggerComponent.inject(this)
@@ -52,7 +65,7 @@ class MyApplication : Application() {
     }
 
     @MyApplicationScope
-    @Component(modules = [MyApplicationModule::class])
+    @Component(modules = [MyApplicationModule::class], dependencies = [BusesNetworkComponent::class])
     interface MyApplicationComponent {
         fun inject(app: MyApplication)
     }
